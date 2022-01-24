@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <section class="textStyler">
+      <p class="textStyler__txt" tabindex="0">- DES GENRES DE JEU VARIÉS</p>
+      <p class="textStyler__txt">
+        - Les trois jeux seront distribués chez nous par la nouvelle filiale de
+        Microids
+      </p>
+      <p class="textStyler__txt">- Microids Distribution France</p>
+      <p class="textStyler__txt">- Cette annonce ne surprend personne</p>
+      <p class="textStyler__txt">
+        - tant elle correspond aux habitudes de l'éditeur : publier des jeux
+        adaptés de célèbres licences
+      </p>
+      <!-- 
+      <textarea name="" id="" cols="100" rows="100">
+        - DES GENRES DE JEU VARIÉS
+
+        - Les trois jeux seront distribués chez nous par la nouvelle filiale de Microids
+        
+        -  Microids Distribution France
+        
+        -  Cette annonce ne surprend personne
+        
+        -  tant elle correspond aux habitudes de l'éditeur : publier des jeux adaptés de célèbres licences
+        
+        -  principalement des bandes dessinées
+        
+        -  Microids a déjà publié des jeux de course Garfield
+        
+        -  des party-games inspirés de Titeuf
+        
+        -  des jeux de plate-formes Marsupilami
+        
+        -  des beat-them-up Astérix et Obélix         
+      </textarea> -->
+      <button class="btn">test</button>
+    </section>
+
+    <style>
+      .modified {
+        text-transform: uppercase;
+        display: inline;
+      }
+    </style>
+
+    <script>
+      let btn = document.querySelector(".btn");
+      let txt = document.querySelectorAll(".textStyler__txt");
+      let color = "test";
+      let fontWeight = "300";
+      let boldState = false;
+
+      let keyState = false;
+      let range = document.createRange();
+
+      txt.forEach((el, index) => {
+        el.addEventListener("mouseup", () => {
+          var text = window.getSelection();
+          //   var indexStart = text.selectionStart;
+          //   console.log(indexStart);
+          //   var indexEnd = text.selectionEnd;
+          let h1 = document.createElement("p");
+          h1.classList.add("modified");
+          h1.style.color = color;
+          h1.style.fontWeight = fontWeight;
+          window.getSelection().getRangeAt(0).surroundContents(h1);
+          window.getSelection().removeAllRanges();
+
+          //pour supprimer
+          //   window.getSelection().getRangeAt(0).deleteContents(h1);
+
+          console.log(text.toString());
+        });
+      });
+
+      window.addEventListener("keydown", (e) => {
+        console.log(e.key);
+        if (keyState == false) {
+          if (e.key == "q") {
+            color = "red";
+          }
+          if (e.key == "w") {
+            color = "blue";
+          }
+          if (e.key == "e") {
+            color = "green";
+          }
+          if (e.key == " ") {
+            if (boldState == false) {
+              //space
+              fontWeight = "bold";
+              console.log(fontWeight, "fontWeight");
+            } else {
+              fontWeight = "300";
+            }
+            boldState = !boldState;
+          }
+          keyState = true;
+        }
+      });
+      window.addEventListener("keyup", (e) => {
+        keyState = false;
+        if (e.key == "q") {
+        }
+      });
+
+      //   document.addEventListener("mouseup", (e, index) => {
+      //     console.log(index);
+      //     var textArea = document.querySelector(".textarea");
+      //     var text = textArea.value;
+      //     var indexStart = textArea.selectionStart;
+      //     var indexEnd = textArea.selectionEnd;
+      //     console.log(text.substring(indexStart, indexEnd));
+      //   });
+    </script>
+  </body>
+</html>

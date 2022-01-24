@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>notes taker</title>
+</head>
+<body id="main">
+    <nav class="navbar">
+        <h1>Easy notes taker for podcasts</h1>
+    </nav>
+
+<div class="cont">
+    <section class="convert">
+        <h1 class="title">insérer texte ici</h1>
+        <textarea class="convert__textarea" tabindex="1"></textarea>
+        <button class="convert__button" tabindex="2">convertir</button>
+        <select class="convert__select">
+            <option value="all">séparer tout</option>
+            <option value="comma">séparer virgules</option>
+            <option value="dot">séparer points</option>
+            <option value="quote">séparer guillemets</option>
+            <option value="linebreak">séparer saut de lignes</option>
+        </select>
+    </section>
+
+    <section class="convertedText" >
+        <h1 class="title">choisir phrases à noter</h1>
+        <div class="convertedText__container" tabindex="3">
+
+        </div>
+    </section>
+
+    <section class="selectedText" >
+        <h1 class="title">notes</h1>
+        <textarea class="selectedText__Textarea"     tabindex="4"></textarea>
+        <button class="selectedText__copyBtn">copier</button>
+    </section>
+</div>
+</body>
+</html>
+
+<script>
+
+    let source ={
+        textarea : document.querySelector(".convert__textarea"),
+        convertBtn : document.querySelector(".convert__button"),
+        selectMenu : document.querySelector("convert__select"), 
+        selectedSeparator : document.querySelector(".convert__select").value,
+        textareaTextContent : "",
+        splitedText : [],
+
+        initialiseObject : ()=>{
+            source.setValues();
+            source.addConvertBtnListener();
+            // converter.addCopyBtnListener();
+            source.addSelectedSeparatorListener();
+        },
+
+        setValues : ()=>{
+            source.textareaTextContent = source.textarea.value;
+        },
+
+        reset : ()=>{
+            source.textarea.value = "";
+            source.selectedSeparator.value = "all";
+        },
+
+        addConvertBtnListener : ()=>{
+            source.convertBtn.addEventListener("click", ()=>{
+                // converted.reset();
+                source.setValues();
+                source.getRidOf(source.selectedSeparator);
+                converted.setValues(source.splitedText);
+                // converter.convertTextIntoSentences(converter.sourceText);
+                // converter.addStatementsListener();
+                // converter.statementsHandler.addKeyboardListeners();
+            });
+        },
+
+        addSelectedSeparatorListener : ()=>{
+            document.querySelector(".convert__select").addEventListener("change", ()=>{
+                source.selectedSeparator = document.querySelector(".convert__select").value;
+            });
+        },
+
+        getRidOf: (selectedSeparator)=>{
+            switch (selectedSeparator) {
+                case "dot":
+                    source.splitedText = source.textareaTextContent.split(/[.]/g);
+                    break;
+
+                case "comma":
+                    source.splitedText = source.textareaTextContent.split(/[,]/g);
+                    break;
+
+                case "linebreak":
+                    source.splitedText = source.textareaTextContent.split(/[\n]/g);
+                    break;
+
+                case "quote":
+                    source.splitedText = source.textareaTextContent.split(/["]/g);
+                    break;
+
+                case "all":
+                    source.splitedText = source.textareaTextContent.split(/[\n\.\,\"]/g);
+                    break;
+            
+                default:
+                    console.log("not a valid selection");
+                    break;
+            }
+        },
+
+
+    }
+
+    source.initialiseObject();
+
+
+    let converted = {
+        textarea : document.querySelector(".convertedText__container"),
+        splittedText : [],
+        storedPTags : [],
+        textToAddToNotes : [],
+        highlightAlreadySelectedP : [],
+
+        setValues : (splitedText)=>{
+            converted.splitedText = splitedText;
+            converted.splitedTextToHtmlP();
+            converted.addListeners();
+            console.log(converted.storedPTags);
+        },
+
+        splitedTextToHtmlP : ()=>{
+            converted.splitedText.forEach((text)=>{
+                let child = document.createElement("p");
+                let textContent = document.createTextNode("- " + text);
+                child.classList.add("convertedText__container_phrase");
+
+                child.appendChild(textContent);
+                converted.storedPTags.push(child);
+                converted.textarea.appendChild(child);
+            });
+
+        },
+
+        addListeners : ()=>{
+            converted.storedPTags.forEach((element)=>{
+                element.addEventListener("click", ()=>{
+                    let text = element.textContent;
+                    if(converted.isAlreadyInStored(text)){
+                        let indxOfAlreadyStoredStatement = converted.textToAddToNotes.indexOf(text);
+                        console.log(indxOfAlreadyStoredStatement);
+                        converted.deleteStatement(indxOfAlreadyStoredStatement);
+                        converted.removeHighlight(indxOfAlreadyStoredStatement);
+                    }else{
+                        converted.addStatement(text);
+                        converted.highlightAlreadySelectedP.push(element);
+                        converted.highlight();
+                    }
+                });
+
+                element.addEventListener("mouseenter", ()=>{
+                    element.style.backgroundColor = "cyan";
+                    element.style.cursor = "pointer";
+                });
+                element.addEventListener("mouseleave", ()=>{
+                    element.style.backgroundColor = "white";
+                    converted.highlight();
+                });
+            });
+        },
+
+        addStatement : (text)=>{
+            converted.textToAddToNotes.push(text);
+            notes.reWriteTextarea();
+        },
+
+        deleteStatement : (indx)=>{
+            converted.textToAddToNotes.splice(indx, 1);
+            notes.reWriteTextarea();
+        },
+
+        highlight : ()=>{
+            converted.highlightAlreadySelectedP.forEach((element)=>{
+                element.style.backgroundColor = "purple";
+            });
+        },
+
+        removeHighlight : (indx)=>{
+            converted.highlightAlreadySelectedP.splice(indx, 1);
+        },
+
+
+
+
+        isAlreadyInStored : (chosenStatement)=>{
+                let indxOfAlreadyStoredStatement = converted.textToAddToNotes.indexOf(chosenStatement);
+                if(indxOfAlreadyStoredStatement != -1){
+                    return true
+                }else{
+                    return false
+                }
+            },
+    }
+
+
+
+    let notes = {
+        textarea : document.querySelector(".selectedText__Textarea"),
+
+        resetTextarea : ()=>{
+            notes.textarea.value = "";
+        },
+
+        reWriteTextarea : ()=>{
+            notes.resetTextarea();
+            converted.textToAddToNotes.forEach((text)=>{
+                notes.textarea.value += text + "\n" + "\n";
+            });
+        },
+
+
+
+       
+    }
+
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////old
+
+    let converter ={
+        convertBtn : document.querySelector(".convert__button"),
+        copyBtn : document.querySelector(".selectedText__copyBtn"),
+        sourceText : "",
+        convertedTextarea : document.querySelector(".convertedText__container"),
+        notesContainer : document.querySelector(".selectedText__Textarea"),
+        storedStatements : [],
+        selectedStatements : [],
+        index : 0,
+        mouseIndex : 0,
+        savedSelectedStatement : "",
+        selectedSeparator : document.querySelector(".convert__select").value,
+        alreadySelectedSentences : [],
+        
+        initialiseObject : ()=>{
+            converter.setValues();
+            converter.addConvertBtnListener();
+            converter.addCopyBtnListener();
+            converter.addSelectedSeparatorListener();
+        },
+
+        reset : ()=>{
+            converter.convertedTextarea.innerHTML = "";
+            converter.storedStatements = [];
+            converter.sourceText = "";
+            converter.selectedStatements = [];
+            converter.index = 0;
+            converter.savedSelectedStatement = "";
+            converter.notesContainer.value = "";
+        },
+
+        setValues : ()=>{
+            converter.sourceText = document.querySelector(".convert__textarea").value;
+        },
+
+        addConvertBtnListener : ()=>{
+            converter.convertBtn.addEventListener("click", ()=>{
+                converter.reset();
+                converter.setValues();
+                converter.getRidOf(converter.selectedSeparator);
+                converter.convertTextIntoSentences(converter.sourceText);
+                converter.addStatementsListener();
+                converter.statementsHandler.addKeyboardListeners();
+            });
+        },
+
+        addCopyBtnListener : ()=>{
+                converter.copyBtn.addEventListener("click", ()=>{
+                    let textarea = converter.notesContainer;
+                    textarea.select();
+                    document.execCommand("copy");
+                });
+        },
+
+        addSelectedSeparatorListener : ()=>{
+            document.querySelector(".convert__select").addEventListener("change", ()=>{
+                converter.selectedSeparator = document.querySelector(".convert__select").value;
+            });
+        },
+
+
+
+        convertTextIntoSentences : (text)=>{
+            text.forEach((el)=>{
+               converter.appendToConvertedTextarea(el);
+            });
+        },
+
+        appendToConvertedTextarea : (text)=>{
+             let child = document.createElement("p");
+                let textContent = document.createTextNode("- " + text);
+                child.classList.add("convertedText__container_phrase");
+
+                converter.storedStatements.push(child);
+                child.appendChild(textContent);
+                converter.convertedTextarea.appendChild(child);
+        },
+
+        addStatementsListener : ()=>{
+            converter.storedStatements.forEach((el, index)=>{
+                el.addEventListener("click", ()=>{
+                    let text = el.textContent;
+                    converter.mouseIndex = index;
+                    converter.statementsHandler.mouseSelectStatement();
+                });
+
+                el.addEventListener("mouseenter", ()=>{
+                    let lastSelectedStatement = converter.convertedTextarea.children[converter.mouseIndex];
+                    converter.colorHandler.saveSelectedStatement(lastSelectedStatement);
+                    let changeIndex = converter.mouseIndex = index;
+                    converter.colorHandler.changeStatementColorHover(el);
+                    // console.log(converter.savedSelectedStatement);
+                });
+            });
+        },
+
+        getRidOf: (selectedSeparator)=>{
+            switch (selectedSeparator) {
+                case "dot":
+                    converter.sourceText = converter.sourceText.split(/[.]/g);
+                    break;
+
+                case "comma":
+                    converter.sourceText = converter.sourceText.split(/[,]/g);
+                    break;
+
+                case "linebreak":
+                    converter.sourceText = converter.sourceText.split(/[\n]/g);
+                    break;
+
+                case "quote":
+                    converter.sourceText = converter.sourceText.split(/["]/g);
+                    break;
+
+                case "all":
+                converter.sourceText = converter.sourceText.split(/[\n\.\,\"]/g);
+                    break;
+            
+                default:
+                    console.log("not a valid selection");
+                    break;
+            }
+        },
+
+
+
+
+
+
+
+        colorHandler : {
+            maxIndex : "",
+
+            saveSelectedStatement : (element)=>{
+                converter.savedSelectedStatement = element;
+            },
+
+            changeStatementColorHover : (element)=>{
+                converter.savedSelectedStatement.style.backgroundColor = "white";
+                element.style.backgroundColor = "#e0e0e0";
+            },
+
+            changeStatementColorKeydown : (downOrUp)=>{
+                if(downOrUp == "down"){
+                    converter.colorHandler.saveSelectedStatement(converter.storedStatements[converter.index]);
+                    converter.savedSelectedStatement.style.backgroundColor = "white";
+                    converter.index --
+                    converter.colorHandler.checkIndexSmaller();
+                }else{
+                    converter.colorHandler.saveSelectedStatement(converter.storedStatements[converter.index]);
+                    converter.savedSelectedStatement.style.backgroundColor = "white";
+                    converter.index ++
+                    converter.colorHandler.checkIndexBigger();                    
+                }
+            },
+
+            checkIndexBigger : ()=>{
+                if(converter.index > converter.colorHandler.maxIndex){
+                        converter.index = 0;
+                        converter.storedStatements[converter.index].style.backgroundColor = "#e0e0e0";
+                        converter.storedStatements[converter.index].scrollIntoView();
+                    }else{
+                        converter.storedStatements[converter.index].style.backgroundColor = "#e0e0e0";
+                        converter.storedStatements[converter.index].scrollIntoView();
+                    }
+            },
+
+            checkIndexSmaller : () =>{
+                if(converter.index < 0){
+                        converter.index = converter.colorHandler.maxIndex;
+                        converter.storedStatements[converter.index].style.backgroundColor = "#e0e0e0";
+                        converter.storedStatements[converter.index].scrollIntoView();
+                    }else{
+                        converter.storedStatements[converter.index].style.backgroundColor = "#e0e0e0";
+                        converter.storedStatements[converter.index].scrollIntoView();
+                    }
+            },
+
+            colorPurple : (element) =>{
+                // element.backgroundColor = "purple";
+            },
+
+
+        },
+
+        statementsHandler : {
+            addKeyboardListeners : ()=>{
+                let mainObj = converter.statementsHandler;
+                converter.colorHandler.maxIndex = converter.storedStatements.length-1;
+                converter.storedStatements[converter.index].style.backgroundColor = "#e0e0e0";
+
+                converter.convertedTextarea.addEventListener("keydown", (e)=>{
+                    e.preventDefault();
+                    let key = e.keyCode;
+                    if(key == 40){ //up
+                        converter.colorHandler.changeStatementColorKeydown("up");
+                    }
+                    if(key == 38){ //down
+                        converter.colorHandler.changeStatementColorKeydown("down");
+                    }
+
+                    if(key == 13){ //enter
+                        mainObj.keyboardSelectStatement();
+                        converter.colorHandler.colorPurple(converter.storedStatements[converter.index].style);
+                    }
+                    if(key == 32){ //enter
+                        mainObj.selectBoldStatement();
+                    }
+                });
+            },
+
+            keyboardSelectStatement : ()=>{
+                let mainObj = converter.statementsHandler;
+                let text = converter.storedStatements[converter.index].textContent + "\n" + "\n";
+                        if(mainObj.isAlreadyInStored(text)){
+                            let indxOfAlreadyStoredStatement = converter.selectedStatements.indexOf(text);
+                            mainObj.deleteStatement(indxOfAlreadyStoredStatement);
+                            
+                        }else{
+                            mainObj.addStatement(text);
+                        }
+            },
+
+            mouseSelectStatement : ()=>{
+                let mainObj = converter.statementsHandler;
+                let text = converter.storedStatements[converter.mouseIndex].textContent + "\n" + "\n";
+                        if(mainObj.isAlreadyInStored(text)){
+                            let indxOfAlreadyStoredStatement = converter.selectedStatements.indexOf(text);
+                            mainObj.deleteStatement(indxOfAlreadyStoredStatement);
+                            
+                        }else{
+                            mainObj.addStatement(text);
+                        }
+            },
+
+            deleteStatement : (indx)=>{
+                converter.selectedStatements.splice(indx, 1);
+                converter.statementsHandler.addToSelectedTextarea();
+            },
+
+            addStatement : (text)=>{
+                converter.selectedStatements.push(text);
+                converter.statementsHandler.colorAllSelectedStatements();
+                converter.statementsHandler.addToSelectedTextarea();
+            },
+
+
+            ////ici
+            colorAllSelectedStatements : ()=>{
+                converter.storedStatements.forEach((el, index)=>{
+                    let base = el.textContent + "\n" + "\n";
+                    converter.selectedStatements.forEach((element)=>{
+                        let test = base.indexOf(element);
+                        if(test == 0){
+                            // el.style.backgroundColor = "cyan";
+                            converter.alreadySelectedSentences.push(el);
+                            converter.alreadySelectedSentences.forEach((e)=>{
+                                e.style.backgroundColor = "cyan";
+                            });
+                        }
+                    });
+                });
+            },
+
+            addToSelectedTextarea : ()=>{
+                let selected = document.querySelector(".selectedText__Textarea");
+                selected.value = "";
+                converter.selectedStatements.forEach((el)=>{
+                    selected.value += el;
+                });
+            },
+
+            isAlreadyInStored : (chosenStatement)=>{
+                let indxOfAlreadyStoredStatement = converter.selectedStatements.indexOf(chosenStatement);
+                
+                if(indxOfAlreadyStoredStatement != -1){
+                    return true
+                }else{
+                    return false
+                }
+            },
+        },
+    }
+
+
+    // converter.initialiseObject();
+
+    let mouseEvents = {
+        containers : [
+            document.querySelector(".convert"),
+            document.querySelector(".convertedText"),
+            document.querySelector(".selectedText"),
+        ],
+
+        textareas : [
+            document.querySelector(".convert__textarea"),
+            document.querySelector(".convertedText__container"),
+            document.querySelector(".selectedText__Textarea"),
+        ],
+
+        isFocused : "",
+
+        setInitialFocus : ()=>{
+           mouseEvents.textareas[0].focus();
+            mouseEvents.saveFocus(document.activeElement);
+        },
+
+        blurElements : ()=>{
+            mouseEvents.containers.forEach((el)=>{
+                el.classList.add("blur");
+            });
+        },
+
+        resetWidth : ()=>{
+            mouseEvents.containers.forEach((el)=>{
+                el.classList.remove("focus");
+            });
+        },
+
+        saveFocus : (element)=>{
+            mouseEvents.isFocused = element; 
+            console.log(element + " saved");
+        },
+
+        unfocusAll : ()=>{
+            mouseEvents.containers.forEach((el)=>{
+                el.classList.remove("focus");
+            });
+        },
+
+        focusThis : (element)=>{
+            element.focus();
+        },
+
+        focusListener : ()=>{
+            mouseEvents.textareas.forEach((el, index)=>{
+                el.addEventListener("focusin", ()=>{
+                    mouseEvents.unfocusAll();
+                    let container = mouseEvents.containers[index]; 
+                    container.classList.add("focus");
+                    mouseEvents.saveFocus(container);
+                });
+                el.addEventListener("focusout", ()=>{
+                    let container = mouseEvents.containers[index]; 
+                    container.classList.remove("focus");
+                });
+            });
+        },
+
+        hover : ()=>{
+            mouseEvents.containers.forEach((el, index)=>{
+                el.addEventListener("mouseenter", ()=>{
+                    mouseEvents.resetWidth();
+                    el.classList.add("focus");
+                    mouseEvents.focusThis(mouseEvents.textareas[index]);
+                });
+                el.addEventListener("mouseleave", ()=>{
+                    // el.classList.remove("focus");
+
+                });
+            });
+        }
+    }
+
+    // mouseEvents.hover();
+    // mouseEvents.focusListener();
+    // mouseEvents.setInitialFocus();         
+   
+
+
+
+</script>
+
+
+<style>
+
+*{
+    box-sizing: border-box;
+    margin : 0;
+    padding: 0; 
+}
+
+html{
+    font-size: 16px;
+}
+
+#main{
+    display: grid;
+    grid-template-areas: 
+    "navbar"
+    "cont"
+    ;
+
+    grid-template-rows: 6rem  1fr;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+button{
+    padding: 1rem;
+    margin: 0.6rem 0;
+    background-color: #535353;
+    font-size: 1rem;
+    color: white;
+    border: solid 0.1rem rgb(190, 190, 190);
+}
+button:hover, button:focus{
+    border: solid 0.5rem rgb(0, 143, 209);
+    box-shadow: 0 0 1.5rem  rgb(0, 143, 209);
+    cursor: pointer;
+    margin: 0.2rem 0 ;
+    outline: none;
+}
+
+.title{
+    color : white;
+    border-bottom :solid 0.3rem rgb(0, 143, 209);
+    margin-bottom : 0.5rem;
+}
+
+.cont{
+    grid-area: cont;
+    display: flex;
+    align-items: flex-start;
+    background-color: #383838;
+}
+
+.navbar{
+    grid-area: navbar;
+    background-color: #383838;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color : white;
+}
+
+.convert{
+    grid-area: convertBtn;
+    background-color: #383838;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center; 
+    width: 100%;
+    height: 100%;
+    animation : reset .3s ease-out forwards;
+}
+.convert:hover{
+    animation : focus .3s ease-out forwards;
+}
+
+.reset{
+    animation : reset .3s ease-out forwards;
+}
+
+.focus{
+    animation : focus .3s ease-out forwards !important;
+    background-color: #535353 !important;
+}
+
+@keyframes reset{
+    from{width: 250%; }
+    to{width: 100%;}
+}
+
+@keyframes focus {
+    from{width: 100%;}
+    to{width: 250%; }
+}
+.blur{
+    filter: blur(2px);
+}
+
+.convert__textarea{
+width: 80%;
+height: 60vh;
+outline: none;
+color: #535353;
+}
+.convert__textarea:focus{
+    border: solid 0.5rem rgb(0, 143, 209);
+    box-shadow: 0 0 1.5rem  rgb(0, 143, 209);
+}
+
+.convert__button{
+
+}
+
+.convert__select{
+    background-color: #535353;
+    color : white;
+    font-size: 1rem;
+    padding: 1rem;
+    outline: none;
+    margin: 0.6rem 0;
+    border: solid 0.1rem rgb(190, 190, 190);
+}
+.convert__select:hover{
+    background-color: #535353;
+    color : white;
+    font-size: 1rem;
+    padding: 1rem;
+    border: solid 0.5rem rgb(0, 143, 209);
+    box-shadow: 0 0 1.5rem  rgb(0, 143, 209);
+    cursor: pointer;
+    margin: 0.2rem 0 ;
+
+}
+
+
+.convertedText{
+    grid-area: convertedText;
+    background-color: #383838;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    animation : reset .3s ease-out forwards;
+    flex-direction: column;
+    height: 100%;
+
+}
+
+.convertedText:hover{
+    animation : focus .3s ease-out forwards;
+}
+
+.convertedText__container{
+    width: 80%;
+    height: 60vh;
+    border: 1px solid black;
+    background-color: white;
+    overflow-y: scroll;
+    outline: none;
+    color: #535353;
+
+}
+.convertedText__container:focus{
+    border: solid 0.5rem rgb(0, 143, 209);
+    box-shadow: 0 0 1.5rem  rgb(0, 143, 209);
+}
+
+.convertedText__container_phrase{
+    margin: 1rem auto; 
+}
+
+.selectedText{
+    grid-area: selectedText;
+    background-color: #383838;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    animation : reset .3s ease-out forwards;
+    flex-direction: column;
+    height: 100%;
+
+}
+.selectedText:hover{
+    animation : focus .3s ease-out forwards;
+}
+
+.selectedText__Textarea{
+    width: 80%;
+    height: 60vh;
+    outline: none;
+    color: #535353;
+}
+.selectedText__Textarea:focus{
+    border: solid 0.5rem rgb(0, 143, 209);
+    box-shadow: 0 0 1.5rem  rgb(0, 143, 209);
+}
+
+
+
+</style>
