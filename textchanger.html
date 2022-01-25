@@ -61,9 +61,14 @@
       let keyState = false;
       let range = document.createRange();
 
+      let savedParagraph = "";
+      let savedSelection = "";
+      let resetMode = false;
+
       txt.forEach((el, index) => {
         el.addEventListener("mouseup", () => {
           var text = window.getSelection();
+          savedSelection = text;
           //   var indexStart = text.selectionStart;
           //   console.log(indexStart);
           //   var indexEnd = text.selectionEnd;
@@ -78,6 +83,17 @@
           //   window.getSelection().getRangeAt(0).deleteContents(h1);
 
           console.log(text.toString());
+        });
+
+        el.addEventListener("mousedown", () => {
+          if (resetMode) {
+            let elText = el.textContent;
+            savedParagraph = elText;
+
+            el.innerHTML = "";
+            el.innerHTML = savedParagraph;
+            console.log(elText);
+          }
         });
       });
 
@@ -102,6 +118,9 @@
               fontWeight = "300";
             }
             boldState = !boldState;
+          }
+          if (e.key == "r") {
+            resetMode = !resetMode;
           }
           keyState = true;
         }
